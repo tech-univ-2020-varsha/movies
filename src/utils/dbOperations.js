@@ -6,6 +6,7 @@ const insertToMovieLists = async (movie) => {
     const moviedb = movieSequelize.movielists;
     await moviedb.create({ id: movie.id, name: movie.name, genres: movie.genres });
   } catch (err) {
+    console.log('error', err.message);
     throw new Error('Unable to add movies');
   }
 };
@@ -28,5 +29,6 @@ const insertToActors = async (actors) => {
     throw new Error('Unable to add actors');
   }
 };
+
 
 module.exports = { insertToMovieLists, insertToGenres, insertToActors };
