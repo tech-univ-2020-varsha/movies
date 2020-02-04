@@ -236,7 +236,7 @@ describe('the add movie function', () => {
   });
 });
 
-xdescribe('the getMovieDetail function', () => {
+describe('the getMovieDetail function', () => {
   it('should obtain status code of 200 on success', async () => {
     const mockGetMovieNameGenre = jest.spyOn(dbOperations, 'getMovieNameGenre');
     const mockGetGenres = jest.spyOn(dbOperations, 'getGenres');
@@ -275,14 +275,14 @@ xdescribe('the getMovieDetail function', () => {
       response: jest.fn(() => ({ code: mockCode })),
     };
     const mockRequest = {
-      request: {
-        params: {
-          id: movieId,
-        },
+      params: {
+        id: movieId,
       },
     };
+
+
     await getMovieDetail(mockRequest, mockH);
     expect(mockH.response).toHaveBeenCalledWith(mockResponse);
-    expect(mockCode).toBe(200);
+    expect(mockCode).toHaveBeenCalledWith(200);
   });
 });
