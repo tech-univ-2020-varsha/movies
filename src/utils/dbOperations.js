@@ -6,7 +6,6 @@ const insertToMovieLists = async (movies) => {
     const moviedb = movieSequelize.movielists;
     await moviedb.bulkCreate(movies);
   } catch (err) {
-    console.log('error', err.message);
     throw new Error('Unable to add movies');
   }
 };
@@ -25,7 +24,6 @@ const insertToActors = async (actors) => {
     const actorsdb = movieSequelize.actors;
     await actorsdb.bulkCreate(actors);
   } catch (err) {
-    console.log(err.message);
     throw new Error('Unable to add actors');
   }
 };

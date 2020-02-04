@@ -1,9 +1,21 @@
 const axios = require('axios');
+let server = require('../../server');
 const dbOperations = require('../../src/utils/dbOperations');
-const { addMovies, getMovieDetail } = require('../../src/handler/movies');
 
-describe('the add movie function', () => {
-  it('should return a success message with status code 200 when data is successfully inserted to db', async () => {
+const init = async () => {
+  await server.initialize();
+  return server;
+};
+
+describe('the POST movies route', () => {
+  beforeEach(async () => {
+    server = await init();
+  });
+  afterEach(async () => {
+    await server.stop();
+  });
+
+  it('should obtain 200 success code for route "movies" with POST method', async () => {
     const mockAxios = jest.spyOn(axios, 'get');
     const mockMovie = {
       id: '6638453965',
@@ -45,23 +57,19 @@ describe('the add movie function', () => {
     mockInsertGenres.mockResolvedValue();
     const mockInsertActors = jest.spyOn(dbOperations, 'insertToActors');
     mockInsertActors.mockResolvedValue();
-    const mockCode = jest.fn();
-    const mockH = {
-      response: jest.fn(() => ({ code: mockCode })),
-    };
-    await addMovies(null, mockH);
 
-    expect(mockInsertMovie).toHaveBeenCalledWith(mockMovieData.data.movies);
-    expect(mockInsertGenres).toHaveBeenCalledWith(mockMovieData.data.genres);
-    expect(mockInsertActors).toHaveBeenCalledWith(mockMovieData.data.actors);
-    expect(mockH.response).toHaveBeenCalledWith('Successfull inserted data to db');
-    expect(mockCode).toHaveBeenCalledWith(200);
+    const postMovies = {
+      method: 'POST',
+      url: '/movies',
+    };
+    const response = await server.inject(postMovies);
+    expect(response.statusCode).toBe(200);
     mockInsertMovie.mockRestore();
     mockInsertGenres.mockRestore();
     mockInsertGenres.mockRestore();
   });
 
-  it('should return a failure message with status code 500 when insert to movie fails', async () => {
+  it('should obtain 500 status code for route "movies" with POST method when when insert to movie fails', async () => {
     const mockAxios = jest.spyOn(axios, 'get');
     const mockMovie = {
       id: '6638453965',
@@ -103,21 +111,20 @@ describe('the add movie function', () => {
     mockInsertGenres.mockResolvedValue();
     const mockInsertActors = jest.spyOn(dbOperations, 'insertToActors');
     mockInsertActors.mockResolvedValue();
-    const mockCode = jest.fn();
-    const mockH = {
-      response: jest.fn(() => ({ code: mockCode })),
-    };
-    await addMovies(null, mockH);
 
-    expect(mockInsertMovie).toHaveBeenCalledWith(mockMovieData.data.movies);
-    expect(mockH.response).toHaveBeenCalledWith('Unable to insert data to db');
-    expect(mockCode).toHaveBeenCalledWith(500);
+    const postMovies = {
+      method: 'POST',
+      url: '/movies',
+    };
+    const response = await server.inject(postMovies);
+    expect(response.statusCode).toBe(500);
+
     mockInsertMovie.mockRestore();
     mockInsertGenres.mockRestore();
     mockInsertGenres.mockRestore();
   });
 
-  it('should return a failure message with status code 500 when insert to genres fails', async () => {
+  it('should obtain 500 status code for route "movies" with POST method when when insert to genres fails', async () => {
     const mockAxios = jest.spyOn(axios, 'get');
     const mockMovie = {
       id: '6638453965',
@@ -160,23 +167,20 @@ describe('the add movie function', () => {
     mockInsertGenres.mockRejectedValue(new Error('Unable to insert data to db'));
     const mockInsertActors = jest.spyOn(dbOperations, 'insertToActors');
     mockInsertActors.mockResolvedValue();
-    const mockCode = jest.fn();
-    const mockH = {
-      response: jest.fn(() => ({ code: mockCode })),
+
+    const postMovies = {
+      method: 'POST',
+      url: '/movies',
     };
-    await addMovies(null, mockH);
+    const response = await server.inject(postMovies);
+    expect(response.statusCode).toBe(500);
 
-    expect(mockInsertMovie).toHaveBeenCalledWith(mockMovieData.data.movies);
-    expect(mockInsertGenres).toHaveBeenCalledWith(mockMovieData.data.genres);
-
-    expect(mockH.response).toHaveBeenCalledWith('Unable to insert data to db');
-    expect(mockCode).toHaveBeenCalledWith(500);
     mockInsertMovie.mockRestore();
     mockInsertGenres.mockRestore();
     mockInsertGenres.mockRestore();
   });
 
-  it('should return a failure message with status code 500 when insert to actors fails', async () => {
+  it('should obtain 500 status code for route "movies" with POST method when when insert to actors fails', async () => {
     const mockAxios = jest.spyOn(axios, 'get');
     const mockMovie = {
       id: '6638453965',
@@ -216,28 +220,31 @@ describe('the add movie function', () => {
     mockInsertMovie.mockResolvedValue();
 
     const mockInsertGenres = jest.spyOn(dbOperations, 'insertToGenres');
-    mockInsertGenres.mockResolvedValue();
+    mockInsertGenres.mockRejectedValue(new Error('Unable to insert data to db'));
     const mockInsertActors = jest.spyOn(dbOperations, 'insertToActors');
-    mockInsertActors.mockRejectedValue(new Error('Unable to insert data to db'));
-    const mockCode = jest.fn();
-    const mockH = {
-      response: jest.fn(() => ({ code: mockCode })),
+    mockInsertActors.mockResolvedValue();
+
+    const postMovies = {
+      method: 'POST',
+      url: '/movies',
     };
-    await addMovies(null, mockH);
+    const response = await server.inject(postMovies);
+    expect(response.statusCode).toBe(500);
 
-    expect(mockInsertMovie).toHaveBeenCalledWith(mockMovieData.data.movies);
-    expect(mockInsertGenres).toHaveBeenCalledWith(mockMovieData.data.genres);
-
-    expect(mockH.response).toHaveBeenCalledWith('Unable to insert data to db');
-    expect(mockCode).toHaveBeenCalledWith(500);
     mockInsertMovie.mockRestore();
     mockInsertGenres.mockRestore();
     mockInsertGenres.mockRestore();
   });
 });
+describe('the GET movies route', () => {
+  beforeEach(async () => {
+    server = await init();
+  });
+  afterEach(async () => {
+    await server.stop();
+  });
 
-describe('the getMovieDetail function', () => {
-  it('should obtain status code of 200 on success', async () => {
+  it('should obtain 200 success code for route "movies/id" with GET method', async () => {
     const mockGetMovieNameGenre = jest.spyOn(dbOperations, 'getMovieNameGenre');
     const mockGetGenres = jest.spyOn(dbOperations, 'getGenres');
     const mockGetActors = jest.spyOn(dbOperations, 'getActors');
@@ -256,34 +263,18 @@ describe('the getMovieDetail function', () => {
     const mockActor = [
       'Morgan Freeman',
     ];
-    const movieId = '6638453965';
-    const mockResponse = {
-      name: 'The Shawshank Redemption',
-      genres: [
-        'Mystery',
-        'Romance',
-      ],
-      actors: [
-        'Morgan Freeman',
-      ],
-    };
+
     mockGetMovieNameGenre.mockResolvedValue(mockMovie);
     mockGetGenres.mockResolvedValue(mockGenre);
     mockGetActors.mockResolvedValue(mockActor);
-    const mockCode = jest.fn();
-    const mockH = {
-      response: jest.fn(() => ({ code: mockCode })),
-    };
-    const mockRequest = {
-      params: {
-        id: movieId,
-      },
-    };
 
 
-    await getMovieDetail(mockRequest, mockH);
-    expect(mockH.response).toHaveBeenCalledWith(mockResponse);
-    expect(mockCode).toHaveBeenCalledWith(200);
+    const getMovies = {
+      method: 'GET',
+      url: '/movies/6638453965',
+    };
+    const response = await server.inject(getMovies);
+    expect(response.statusCode).toBe(200);
   });
 
 
@@ -291,11 +282,6 @@ describe('the getMovieDetail function', () => {
     const mockGetMovieNameGenre = jest.spyOn(dbOperations, 'getMovieNameGenre');
     const mockGetGenres = jest.spyOn(dbOperations, 'getGenres');
     const mockGetActors = jest.spyOn(dbOperations, 'getActors');
-    const mockCode = jest.fn();
-    const mockH = {
-      response: jest.fn(() => ({ code: mockCode })),
-    };
-
 
     const mockGenre = [
       'Mystery',
@@ -304,30 +290,26 @@ describe('the getMovieDetail function', () => {
     const mockActor = [
       'Morgan Freeman',
     ];
-    const movieId = '6638453965';
+
 
     mockGetMovieNameGenre.mockRejectedValue(new Error('Unable to obtain the details'));
     mockGetGenres.mockResolvedValue(mockGenre);
     mockGetActors.mockResolvedValue(mockActor);
 
-    const mockRequest = {
-      params: {
-        id: movieId,
-      },
+
+    const getMovies = {
+      method: 'GET',
+      url: '/movies/6638453965',
     };
-    await getMovieDetail(mockRequest, mockH);
-    expect(mockH.response).toHaveBeenCalledWith('Unable to obtain the details');
-    expect(mockCode).toHaveBeenCalledWith(500);
+    const response = await server.inject(getMovies);
+    expect(response.statusCode).toBe(500);
   });
 
-  it('should obtain status code of 500 when we fail to obatin getGenres ', async () => {
+  it('should obtain status code of 500 when we fail to obatin getGenres', async () => {
     const mockGetMovieNameGenre = jest.spyOn(dbOperations, 'getMovieNameGenre');
     const mockGetGenres = jest.spyOn(dbOperations, 'getGenres');
     const mockGetActors = jest.spyOn(dbOperations, 'getActors');
-    const mockCode = jest.fn();
-    const mockH = {
-      response: jest.fn(() => ({ code: mockCode })),
-    };
+
     const mockMovie = {
       name: 'The Shawshank Redemption',
       genres: [
@@ -340,31 +322,27 @@ describe('the getMovieDetail function', () => {
     const mockActor = [
       'Morgan Freeman',
     ];
-    const movieId = '6638453965';
+
 
     mockGetMovieNameGenre.mockResolvedValue(mockMovie);
     mockGetGenres.mockRejectedValue(new Error('Unable to obtain the details'));
 
     mockGetActors.mockResolvedValue(mockActor);
 
-    const mockRequest = {
-      params: {
-        id: movieId,
-      },
+
+    const getMovies = {
+      method: 'GET',
+      url: '/movies/6638453965',
     };
-    await getMovieDetail(mockRequest, mockH);
-    expect(mockH.response).toHaveBeenCalledWith('Unable to obtain the details');
-    expect(mockCode).toHaveBeenCalledWith(500);
+    const response = await server.inject(getMovies);
+    expect(response.statusCode).toBe(500);
   });
 
   it('should obtain status code of 500 when we fail to obatin getActors ', async () => {
     const mockGetMovieNameGenre = jest.spyOn(dbOperations, 'getActors');
     const mockGetGenres = jest.spyOn(dbOperations, 'getGenres');
     const mockGetActors = jest.spyOn(dbOperations, 'getActors');
-    const mockCode = jest.fn();
-    const mockH = {
-      response: jest.fn(() => ({ code: mockCode })),
-    };
+
     const mockMovie = {
       name: 'The Shawshank Redemption',
       genres: [
@@ -378,20 +356,30 @@ describe('the getMovieDetail function', () => {
       'Romance',
     ];
 
-    const movieId = '6638453965';
 
     mockGetMovieNameGenre.mockResolvedValue(mockMovie);
     mockGetActors.mockRejectedValue(new Error('Unable to obtain the details'));
 
     mockGetGenres.mockResolvedValue(mockGenre);
 
-    const mockRequest = {
-      params: {
-        id: movieId,
-      },
+
+    const getMovies = {
+      method: 'GET',
+      url: '/movies/6638453965',
     };
-    await getMovieDetail(mockRequest, mockH);
-    expect(mockH.response).toHaveBeenCalledWith('Unable to obtain the details');
-    expect(mockCode).toHaveBeenCalledWith(500);
+    const response = await server.inject(getMovies);
+    expect(response.statusCode).toBe(500);
+  });
+});
+
+
+describe('the invalid route', () => {
+  it('should obtain status code of 404 when invalid path is requested', async () => {
+    const somePath = {
+      method: 'POST',
+      url: '/movies/6638453965',
+    };
+    const response = await server.inject(somePath);
+    expect(response.statusCode).toBe(404);
   });
 });
