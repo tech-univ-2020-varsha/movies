@@ -27,6 +27,19 @@ const addMovies = async (request, h) => {
     return h.response(error.message).code(500);
   }
 };
-const getMovie = (request, h) => h.response('get movie');
+const getMovieDetail = async (request, h) => {
+  try {
+    const movieId = request.params.id;
+    const movieResponse = {};
+    const result = await dbOperations.getMovieNameGenre(movieId);
+    movieResponse.name = result.name;
+    movieResponse.genres = await dbOperations.getGenres(result.genres);
+    movieResponse.actors = await dbOperations.getActors(movieId);
+    return h.response(movieResponse).code(200);
+  } catch (error) {
+    return h.response(error.message).code(500);
+  }
+};
 
-module.exports = { addMovies, getMovie };
+
+module.exports = { addMovies, getMovieDetail };

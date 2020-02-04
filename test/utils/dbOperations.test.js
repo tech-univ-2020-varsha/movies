@@ -1,6 +1,6 @@
+const { Op } = require('sequelize');
 const dbOperations = require('../../src/utils/dbOperations');
 const movieSequelize = require('../../models/index');
-
 
 describe('the insertToMovieLists operation', () => {
   const moviedb = movieSequelize.movielists;
@@ -92,6 +92,138 @@ describe('the insertToActors operation', () => {
       await dbOperations.insertToActors(mockActor);
     } catch (err) {
       expect(err.message).toBe('Unable to add actors');
+    }
+  });
+});
+
+describe('the getMovieNameGenre operation', () => {
+  const movieid = '7533474498';
+  const moviedb = movieSequelize.movielists;
+
+  it('should get the name and genre given to movieID on success', async () => {
+    const mockFindOne = jest.spyOn(moviedb, 'findOne');
+    const mockFindOneAttributes = {
+      raw: true,
+      attributes: ['name', 'genres'],
+      where: {
+        id: movieid,
+      },
+    };
+    mockFindOne.mockResolvedValue();
+    await dbOperations.getMovieNameGenre(movieid);
+    expect(mockFindOne).toHaveBeenCalledWith(mockFindOneAttributes);
+  });
+
+  it('should return error message when insert to db operation fails', async () => {
+    try {
+      const mockFindOne = jest.spyOn(moviedb, 'findOne');
+      const mockFindOneAttributes = {
+        raw: true,
+        attributes: ['name', 'genres'],
+        where: {
+          id: movieid,
+        },
+      };
+      mockFindOne.mockRejectedValue(new Error('Unable to obtain the details'));
+      await dbOperations.getMovieNameGenre(movieid);
+      expect(mockFindOne).toHaveBeenCalledWith(mockFindOneAttributes);
+    } catch (err) {
+      expect(err.message).toBe('Unable to obtain the details');
+    }
+  });
+});
+
+
+describe('the getGenres operation', () => {
+  const genresIdArray = [1, 2, 3];
+  const genresdb = movieSequelize.genres;
+
+  it('should get the name and genre given to movieID on success', async () => {
+    const mockFindAll = jest.spyOn(genresdb, 'findAll');
+    const mockfindAllAttributes = {
+      raw: true,
+      attributes: ['name'],
+      where: {
+        id: genresIdArray,
+      },
+    };
+    const mockFindAllResult = [{
+      name: 'Crime',
+
+    }];
+    mockFindAll.mockResolvedValue(mockFindAllResult);
+    await dbOperations.getGenres(genresIdArray);
+
+    expect(mockFindAll).toHaveBeenCalledWith(mockfindAllAttributes);
+
+
+    mockFindAll.mockRestore();
+  });
+
+  it('should return error message when insert to db operation fails', async () => {
+    try {
+      const mockFindAll = jest.spyOn(genresdb, 'findAll');
+      const mockFindAllAttributes = {
+        raw: true,
+        attributes: ['name'],
+        where: {
+          id: genresIdArray,
+        },
+      };
+      mockFindAll.mockRejectedValue(new Error('Unable to obtain the details'));
+      await dbOperations.getGenres(genresIdArray);
+      expect(mockFindAll).toHaveBeenCalledWith(mockFindAllAttributes);
+    } catch (err) {
+      expect(err.message).toBe('Unable to obtain the details');
+    }
+  });
+});
+
+describe('the getActors operation', () => {
+  const movieid = '7533474498';
+  const actorsdb = movieSequelize.actors;
+
+  it('should get the actors given to movieID on success', async () => {
+    const mockFindAll = jest.spyOn(actorsdb, 'findAll');
+    const mockfindAllAttributes = {
+      raw: true,
+      attributes: ['name'],
+      where: {
+        movies: {
+          [Op.contains]: [`${movieid}`],
+        },
+      },
+    };
+    const mockFindAllResult = [{
+      name: 'Brad Pitt',
+
+    }];
+    mockFindAll.mockResolvedValue(mockFindAllResult);
+    await dbOperations.getActors(movieid);
+
+    expect(mockFindAll).toHaveBeenCalledWith(mockfindAllAttributes);
+
+
+    mockFindAll.mockRestore();
+  });
+
+  it('should return error message when insert to db operation fails', async () => {
+    try {
+      const mockFindAll = jest.spyOn(actorsdb, 'findAll');
+      const mockFindAllAttributes = {
+        raw: true,
+        attributes: ['name'],
+        where: {
+          movies: {
+            [Op.contains]: [`${movieid}`],
+          },
+        },
+      };
+      mockFindAll.mockRejectedValue(new Error('Unable to obtain the details'));
+      await dbOperations.getActors(movieid);
+      expect(mockFindAll).toHaveBeenCalledWith(mockFindAllAttributes);
+    } catch (err) {
+      expect(err.message).toBe('Unable to obtain the details');
     }
   });
 });

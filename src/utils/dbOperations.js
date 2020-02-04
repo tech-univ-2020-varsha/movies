@@ -1,5 +1,5 @@
+const { Op } = require('sequelize');
 const movieSequelize = require('../../models/index');
-
 
 const insertToMovieLists = async (movies) => {
   try {
@@ -30,9 +30,62 @@ const insertToActors = async (actors) => {
   }
 };
 
-// const getMovieDetails = async (movieId) => {
 
-// };
+const getMovieNameGenre = async (movieId) => {
+  const moviedb = movieSequelize.movielists;
+  try {
+    const result = await moviedb.findOne({
+      raw: true,
+      attributes: ['name', 'genres'],
+      where: {
+        id: movieId,
+      },
+    });
+    return result;
+  } catch (err) {
+    throw new Error('Unable to obtain the details');
+  }
+};
+
+const getGenres = async (genresIdArray) => {
+  const genresdb = movieSequelize.genres;
+  try {
+    let result = await genresdb.findAll(
+      {
+        raw: true,
+        attributes: ['name'],
+        where: {
+          id: genresIdArray,
+        },
+      },
+    );
+    result = result.map((genres) => genres.name);
+    return result;
+  } catch (err) {
+    throw new Error('Unable to obtain the details');
+  }
+};
 
 
-module.exports = { insertToMovieLists, insertToGenres, insertToActors };
+const getActors = async (movieId) => {
+  const actorsdb = movieSequelize.actors;
+  try {
+    let result = await actorsdb.findAll({
+      raw: true,
+      attributes: ['name'],
+      where: {
+        movies: {
+          [Op.contains]: [`${movieId}`],
+        },
+      },
+    });
+    result = result.map((actor) => actor.name);
+    return result;
+  } catch (err) {
+    throw new Error('Unable to obtain the details');
+  }
+};
+
+module.exports = {
+  insertToMovieLists, insertToGenres, insertToActors, getMovieNameGenre, getGenres, getActors,
+};

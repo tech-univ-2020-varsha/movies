@@ -1,4 +1,4 @@
-const { addMovies, getMovie } = require('../handler/movies');
+const { addMovies, getMovieDetail } = require('../handler/movies');
 
 const movieRoutes = [
   {
@@ -8,7 +8,7 @@ const movieRoutes = [
     path: '/movies/{id}',
     method: 'GET',
 
-    handler: getMovie,
+    handler: getMovieDetail,
 
   },
 

@@ -1,6 +1,6 @@
 const axios = require('axios');
 const dbOperations = require('../../src/utils/dbOperations');
-const { addMovies, getMovie } = require('../../src/handler/movies');
+const { addMovies, getMovieDetail } = require('../../src/handler/movies');
 
 describe('the add movie function', () => {
   it('should return a success message with status code 200 when data is successfully inserted to db', async () => {
@@ -233,5 +233,56 @@ describe('the add movie function', () => {
     mockInsertMovie.mockRestore();
     mockInsertGenres.mockRestore();
     mockInsertGenres.mockRestore();
+  });
+});
+
+xdescribe('the getMovieDetail function', () => {
+  it('should obtain status code of 200 on success', async () => {
+    const mockGetMovieNameGenre = jest.spyOn(dbOperations, 'getMovieNameGenre');
+    const mockGetGenres = jest.spyOn(dbOperations, 'getGenres');
+    const mockGetActors = jest.spyOn(dbOperations, 'getActors');
+    const mockMovie = {
+      name: 'The Shawshank Redemption',
+      genres: [
+        2,
+        4,
+      ],
+    };
+
+    const mockGenre = [
+      'Mystery',
+      'Romance',
+    ];
+    const mockActor = [
+      'Morgan Freeman',
+    ];
+    const movieId = '6638453965';
+    const mockResponse = {
+      name: 'The Shawshank Redemption',
+      genres: [
+        'Mystery',
+        'Romance',
+      ],
+      actors: [
+        'Morgan Freeman',
+      ],
+    };
+    mockGetMovieNameGenre.mockResolvedValue(mockMovie);
+    mockGetGenres.mockResolvedValue(mockGenre);
+    mockGetActors.mockResolvedValue(mockActor);
+    const mockCode = jest.fn();
+    const mockH = {
+      response: jest.fn(() => ({ code: mockCode })),
+    };
+    const mockRequest = {
+      request: {
+        params: {
+          id: movieId,
+        },
+      },
+    };
+    await getMovieDetail(mockRequest, mockH);
+    expect(mockH.response).toHaveBeenCalledWith(mockResponse);
+    expect(mockCode).toBe(200);
   });
 });
