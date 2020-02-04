@@ -41,5 +41,26 @@ const getMovieDetail = async (request, h) => {
   }
 };
 
+const insertMovie = async (request, h) => {
+  try {
+    const movieJson = request.payload;
+    const movieId = Math.floor(100000 + Math.random() * 900000);
+    const movieDbData = {};
+    movieDbData.id = movieId;
+    movieDbData.name = movieJson.name;
+    movieDbData.genres = [];
+    const genresData = await dbOperations.getGenreId(movieJson.genres);
+    let id = 0;
+    for (id = 0; id < genresData.length; id += 1) {
+      console.log(genresData[id][0]);
+      movieDbData.genres.push(genresData[id][0].id);
+    }
+    await dbOperations.insertToMovieLists([movieDbData]);
+    return h.response(movieDbData).code(200);
+  } catch (err) {
+    return h.response(err.message).code(500);
+  }
+};
 
-module.exports = { addMovies, getMovieDetail };
+
+module.exports = { addMovies, getMovieDetail, insertMovie };

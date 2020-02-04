@@ -84,6 +84,30 @@ const getActors = async (movieId) => {
   }
 };
 
+const getGenreId = async (genrelist) => {
+  const genresdb = movieSequelize.genres;
+  const result = [];
+  let id = 0;
+  for (id = 0; id < genrelist.length; id += 1) {
+    const response = await genresdb.findOrCreate({
+      raw: true,
+      attributes: ['id'],
+      where: {
+        name: genrelist[id],
+      },
+      defaults:
+        {
+          id: 7,
+          name: genrelist[id],
+        },
+    });
+    result.push(response);
+  }
+
+  console.log(result);
+  return result;
+};
+
 module.exports = {
-  insertToMovieLists, insertToGenres, insertToActors, getMovieNameGenre, getGenres, getActors,
+  insertToMovieLists, insertToGenres, insertToActors, getMovieNameGenre, getGenres, getActors, getGenreId,
 };
