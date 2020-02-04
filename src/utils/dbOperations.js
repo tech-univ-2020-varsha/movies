@@ -1,10 +1,10 @@
 const movieSequelize = require('../../models/index');
 
 
-const insertToMovieLists = async (movie) => {
+const insertToMovieLists = async (movies) => {
   try {
     const moviedb = movieSequelize.movielists;
-    await moviedb.create({ id: movie.id, name: movie.name, genres: movie.genres });
+    await moviedb.bulkCreate(movies);
   } catch (err) {
     console.log('error', err.message);
     throw new Error('Unable to add movies');
@@ -14,7 +14,7 @@ const insertToMovieLists = async (movie) => {
 const insertToGenres = async (genres) => {
   try {
     const genresdb = movieSequelize.genres;
-    await genresdb.create({ id: genres.id, name: genres.name });
+    await genresdb.bulkCreate(genres);
   } catch (err) {
     throw new Error('Unable to add genres');
   }
@@ -23,12 +23,16 @@ const insertToGenres = async (genres) => {
 const insertToActors = async (actors) => {
   try {
     const actorsdb = movieSequelize.actors;
-    await actorsdb.create({ name: actors.name, movies: actors.movies });
+    await actorsdb.bulkCreate(actors);
   } catch (err) {
     console.log(err.message);
     throw new Error('Unable to add actors');
   }
 };
+
+// const getMovieDetails = async (movieId) => {
+
+// };
 
 
 module.exports = { insertToMovieLists, insertToGenres, insertToActors };

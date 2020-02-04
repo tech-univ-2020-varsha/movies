@@ -51,9 +51,9 @@ describe('the add movie function', () => {
     };
     await addMovies(null, mockH);
 
-    expect(mockInsertMovie).toHaveBeenCalledWith(mockMovie);
-    expect(mockInsertGenres).toHaveBeenCalledWith(mockGenre);
-    expect(mockInsertActors).toHaveBeenCalledWith(mockActor);
+    expect(mockInsertMovie).toHaveBeenCalledWith(mockMovieData.data.movies);
+    expect(mockInsertGenres).toHaveBeenCalledWith(mockMovieData.data.genres);
+    expect(mockInsertActors).toHaveBeenCalledWith(mockMovieData.data.actors);
     expect(mockH.response).toHaveBeenCalledWith('Successfull inserted data to db');
     expect(mockCode).toHaveBeenCalledWith(200);
     mockInsertMovie.mockRestore();
@@ -61,7 +61,7 @@ describe('the add movie function', () => {
     mockInsertGenres.mockRestore();
   });
 
-  xit('should return a failure message with status code 500 when data is not inserted to db', async () => {
+  it('should return a failure message with status code 500 when insert to movie fails', async () => {
     const mockAxios = jest.spyOn(axios, 'get');
     const mockMovie = {
       id: '6638453965',
@@ -109,9 +109,125 @@ describe('the add movie function', () => {
     };
     await addMovies(null, mockH);
 
-    expect(mockInsertMovie).toHaveBeenCalledWith(mockMovie);
-    expect(mockInsertGenres).toHaveBeenCalledWith(mockGenre);
-    expect(mockInsertActors).toHaveBeenCalledWith(mockActor);
+    expect(mockInsertMovie).toHaveBeenCalledWith(mockMovieData.data.movies);
+    expect(mockH.response).toHaveBeenCalledWith('Unable to insert data to db');
+    expect(mockCode).toHaveBeenCalledWith(500);
+    mockInsertMovie.mockRestore();
+    mockInsertGenres.mockRestore();
+    mockInsertGenres.mockRestore();
+  });
+
+  it('should return a failure message with status code 500 when insert to genres fails', async () => {
+    const mockAxios = jest.spyOn(axios, 'get');
+    const mockMovie = {
+      id: '6638453965',
+      name: 'The Shawshank Redemption',
+      genres: [
+        2,
+        4,
+      ],
+    };
+
+    const mockActor = {
+      name: 'Brad Pitt',
+      movies: [
+        '7533474498',
+        '1393797017',
+        '6621531523',
+      ],
+    };
+    const mockGenre = {
+
+      name: 'Crime',
+      id: 1,
+
+    };
+    const mockMovieData = {
+      data: {
+        movies: [mockMovie],
+        genres: [mockGenre],
+        actors: [mockActor],
+      },
+
+    };
+
+    mockAxios.mockResolvedValue(mockMovieData);
+
+    const mockInsertMovie = jest.spyOn(dbOperations, 'insertToMovieLists');
+    mockInsertMovie.mockResolvedValue();
+
+    const mockInsertGenres = jest.spyOn(dbOperations, 'insertToGenres');
+    mockInsertGenres.mockRejectedValue(new Error('Unable to insert data to db'));
+    const mockInsertActors = jest.spyOn(dbOperations, 'insertToActors');
+    mockInsertActors.mockResolvedValue();
+    const mockCode = jest.fn();
+    const mockH = {
+      response: jest.fn(() => ({ code: mockCode })),
+    };
+    await addMovies(null, mockH);
+
+    expect(mockInsertMovie).toHaveBeenCalledWith(mockMovieData.data.movies);
+    expect(mockInsertGenres).toHaveBeenCalledWith(mockMovieData.data.genres);
+
+    expect(mockH.response).toHaveBeenCalledWith('Unable to insert data to db');
+    expect(mockCode).toHaveBeenCalledWith(500);
+    mockInsertMovie.mockRestore();
+    mockInsertGenres.mockRestore();
+    mockInsertGenres.mockRestore();
+  });
+
+  it('should return a failure message with status code 500 when insert to actors fails', async () => {
+    const mockAxios = jest.spyOn(axios, 'get');
+    const mockMovie = {
+      id: '6638453965',
+      name: 'The Shawshank Redemption',
+      genres: [
+        2,
+        4,
+      ],
+    };
+
+    const mockActor = {
+      name: 'Brad Pitt',
+      movies: [
+        '7533474498',
+        '1393797017',
+        '6621531523',
+      ],
+    };
+    const mockGenre = {
+
+      name: 'Crime',
+      id: 1,
+
+    };
+    const mockMovieData = {
+      data: {
+        movies: [mockMovie],
+        genres: [mockGenre],
+        actors: [mockActor],
+      },
+
+    };
+
+    mockAxios.mockResolvedValue(mockMovieData);
+
+    const mockInsertMovie = jest.spyOn(dbOperations, 'insertToMovieLists');
+    mockInsertMovie.mockResolvedValue();
+
+    const mockInsertGenres = jest.spyOn(dbOperations, 'insertToGenres');
+    mockInsertGenres.mockResolvedValue();
+    const mockInsertActors = jest.spyOn(dbOperations, 'insertToActors');
+    mockInsertActors.mockRejectedValue(new Error('Unable to insert data to db'));
+    const mockCode = jest.fn();
+    const mockH = {
+      response: jest.fn(() => ({ code: mockCode })),
+    };
+    await addMovies(null, mockH);
+
+    expect(mockInsertMovie).toHaveBeenCalledWith(mockMovieData.data.movies);
+    expect(mockInsertGenres).toHaveBeenCalledWith(mockMovieData.data.genres);
+
     expect(mockH.response).toHaveBeenCalledWith('Unable to insert data to db');
     expect(mockCode).toHaveBeenCalledWith(500);
     mockInsertMovie.mockRestore();
