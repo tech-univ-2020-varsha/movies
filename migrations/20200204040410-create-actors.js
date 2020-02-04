@@ -1,14 +1,17 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => queryInterface.createTable('actors', {
-
+    id: {
+      allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
+    },
     name: {
       type: Sequelize.TEXT,
     },
-    movieid: {
+    movies: {
       type: Sequelize.ARRAY(Sequelize.STRING),
-      primaryKey: true,
-      allowNull: false,
     },
     createdAt: {
       allowNull: false,
