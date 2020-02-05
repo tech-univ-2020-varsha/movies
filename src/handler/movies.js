@@ -4,24 +4,13 @@ const dbOperations = require('../utils/dbOperations');
 const addMovies = async (request, h) => {
   try {
     const movieUrl = 'https://stormy-plains-72807.herokuapp.com/movies';
-    const movies = await axios.get(movieUrl);
-    const moviesData = movies.data.movies;
-
-    await dbOperations.insertToMovieLists(moviesData);
-
-
     const genresUrl = 'https://stormy-plains-72807.herokuapp.com/genres';
-    const genres = await axios.get(genresUrl);
-    const genresData = genres.data.genres;
-    await dbOperations.insertToGenres(genresData);
-
-
     const actorsUrl = 'https://stormy-plains-72807.herokuapp.com/actors';
-    const actors = await axios.get(actorsUrl);
-    const actorsData = actors.data.actors;
-    await dbOperations.insertToActors(actorsData);
-
-
+    await Promise.all([axios.get(movieUrl), axios.get(genresUrl), axios.get(actorsUrl)]).then((values) => {
+      dbOperations.insertToMovieLists(values[0].data.movies);
+      dbOperations.insertToGenres(values[1].data.genres);
+      dbOperations.insertToActors(values[2].data.actors);
+    });
     return h.response('Successfull inserted data to db').code(200);
   } catch (error) {
     return h.response(error.message).code(500);
@@ -44,21 +33,22 @@ const getMovieDetail = async (request, h) => {
 const insertMovie = async (request, h) => {
   try {
     const movieJson = request.payload;
-    const movieId = Math.floor(100000 + Math.random() * 900000);
-    const movieDbData = {};
-    movieDbData.id = movieId;
-    movieDbData.name = movieJson.name;
-    movieDbData.genres = [];
-    const genresData = await dbOperations.getGenreId(movieJson.genres);
-    let id = 0;
-    for (id = 0; id < genresData.length; id += 1) {
-      console.log(genresData[id][0]);
-      movieDbData.genres.push(genresData[id][0].id);
+    const moviePresent = await dbOperations.getMovie(movieJson.name);
+
+    if (moviePresent.length === 0) {
+      const movieId = Math.floor(100000 + Math.random() * 900000);
+      const movieDbData = {};
+      movieDbData.id = movieId;
+      movieDbData.name = movieJson.name;
+      movieDbData.genres = await dbOperations.getGenreId(movieJson.genres);
+      await dbOperations.insertToMovieLists([movieDbData]);
+      await dbOperations.updateOrInsertActor(movieJson.actors, movieId);
+      return h.response(movieDbData).code(200);
     }
-    await dbOperations.insertToMovieLists([movieDbData]);
-    return h.response(movieDbData).code(200);
+    return h.response('database already contains the movie');
   } catch (err) {
-    return h.response(err.message).code(500);
+    console.log(err);
+    return h.response(err).code(500);
   }
 };
 

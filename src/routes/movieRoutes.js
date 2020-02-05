@@ -12,7 +12,7 @@ const movieRoutes = [
 
   },
   {
-    path: '/movies/add',
+    path: '/movies/movie',
     method: 'POST',
 
     handler: insertMovie,

@@ -2,9 +2,10 @@
 module.exports = {
   up: (queryInterface, Sequelize) => queryInterface.createTable('genres', {
     id: {
-      type: Sequelize.INTEGER,
-      primaryKey: true,
       allowNull: false,
+      autoIncrement: true,
+      primaryKey: true,
+      type: Sequelize.INTEGER,
     },
     name: {
       type: Sequelize.TEXT,

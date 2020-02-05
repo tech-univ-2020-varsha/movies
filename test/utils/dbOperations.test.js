@@ -133,6 +133,48 @@ describe('the getMovieNameGenre operation', () => {
   });
 });
 
+describe('the get movie function', () => {
+  const moviesdb = movieSequelize.movielists;
+  it('should get the movie on success', async () => {
+    const mockMovieName = 'Pineapple Express';
+    const mockFindAll = jest.spyOn(moviesdb, 'findAll');
+    const mockfindAllAttributes = {
+      raw: true,
+      attributes: ['name'],
+      where: {
+        name: mockMovieName,
+      },
+    };
+    const mockFindAllResult = [{
+      name: 'Pineapple Express',
+
+    }];
+    mockFindAll.mockResolvedValue(mockFindAllResult);
+    const result = await dbOperations.getMovie(mockMovieName);
+    expect(mockFindAll).toHaveBeenCalledWith(mockfindAllAttributes);
+    expect(result).toBe(mockFindAllResult);
+  });
+  it('should return an error message when db operation to fetch movie fails', async () => {
+    const mockMovieName = 'Pineapple Express';
+    try {
+      const mockFindAll = jest.spyOn(moviesdb, 'findAll');
+      const mockfindAllAttributes = {
+        raw: true,
+        attributes: ['name'],
+        where: {
+          name: mockMovieName,
+        },
+      };
+
+      mockFindAll.mockRejectedValue(new Error('Unable to fetch the movie'));
+      await dbOperations.getMovie(mockMovieName);
+      expect(mockFindAll).toHaveBeenCalledWith(mockfindAllAttributes);
+    } catch (err) {
+      expect(err.message).toBe('Unable to fetch the movie');
+    }
+  });
+});
+
 
 describe('the getGenres operation', () => {
   const genresIdArray = [1, 2, 3];
@@ -227,3 +269,11 @@ describe('the getActors operation', () => {
     }
   });
 });
+
+// describe('the get genreId function', () => {
+//   it('should return the array of genre id on success', () => {
+//     const genresdb = movieSequelize.genres;
+//     const mockFindOne = jest.spyOn(genresdb, 'findOne');
+
+//   });
+// });

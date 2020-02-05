@@ -83,31 +83,97 @@ const getActors = async (movieId) => {
     throw new Error('Unable to obtain the details');
   }
 };
+const getMovie = async (movieName) => {
+  try {
+    const moviesdb = movieSequelize.movielists;
+    const result = await moviesdb.findAll({
+      attributes: ['name'],
+      raw: true,
+      where: {
+        name: movieName,
+      },
+    });
+    return result;
+  } catch (err) {
+    throw new Error('Unable to fetch the movie');
+  }
+};
 
 const getGenreId = async (genrelist) => {
   const genresdb = movieSequelize.genres;
-  const result = [];
-  let id = 0;
-  for (id = 0; id < genrelist.length; id += 1) {
-    const response = await genresdb.findOrCreate({
-      raw: true,
-      attributes: ['id'],
-      where: {
-        name: genrelist[id],
-      },
-      defaults:
-        {
-          id: 7,
-          name: genrelist[id],
-        },
-    });
-    result.push(response);
-  }
+  try {
+    const result = [];
 
-  console.log(result);
-  return result;
+    // eslint-disable-next-line no-restricted-syntax
+    for (const genre of genrelist) {
+      // eslint-disable-next-line no-await-in-loop
+      const response = await genresdb.findOne({
+        raw: true,
+        attributes: ['id'],
+        where: {
+          name: genre,
+        },
+      });
+      // eslint-disable-next-line no-await-in-loop
+      const genreLength = await genresdb.findAll({ raw: true });
+      if (response === null) {
+        // eslint-disable-next-line no-await-in-loop
+        await genresdb.create({
+          id: genreLength.length + 1,
+          name: genre,
+        });
+        result.push(genreLength.length + 1);
+      } else {
+        result.push(response.id);
+      }
+    }
+    return result;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
+
+const updateOrInsertActor = async (actorsList, movieId) => {
+  const actorsdb = movieSequelize.actors;
+  try {
+    const id = 0;
+    actorsList.forEach(async (actor) => {
+      const checkActorPresent = await actorsdb.findAll({
+        attributes: ['movies'],
+        raw: true,
+        where: {
+          name: actor,
+        },
+      });
+      if (checkActorPresent.length === 0) {
+        await actorsdb.create({
+          name: actor,
+          movies: [movieId],
+        });
+      } else {
+        await actorsdb.update({
+          movies: [...checkActorPresent.movies, movieId],
+        }, {
+          where:
+          {
+            name: actorsList[id],
+          },
+        });
+      }
+    });
+  } catch (err) {
+    throw new Error(err.message);
+  }
 };
 
 module.exports = {
-  insertToMovieLists, insertToGenres, insertToActors, getMovieNameGenre, getGenres, getActors, getGenreId,
+  insertToMovieLists,
+  insertToGenres,
+  insertToActors,
+  getMovieNameGenre,
+  getGenres,
+  getActors,
+  getGenreId,
+  updateOrInsertActor,
+  getMovie,
 };
